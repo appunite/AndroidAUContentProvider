@@ -19,8 +19,8 @@ package com.appunite.contentprovider;
 import java.util.HashSet;
 import java.util.Set;
 
-
 import android.provider.BaseColumns;
+import android.text.TextUtils;
 
 public class ContentProviderHelper {
 	public static boolean isInProjection(String[] projection, String... columns) {
@@ -58,5 +58,23 @@ public class ContentProviderHelper {
 				return true;
 		}
 		return false;
+	}
+	
+	public static String addIdExpressionToSelection(String selection, String field) {
+		if (TextUtils.isEmpty(selection))
+			return String.format("%s = ?", field);
+		else
+			return String.format("(%s) AND %s = ?", selection, field);
+	}
+	
+	public static String[] addIdToSelectionArgs(String[] selectionArgs, String id) {
+		if (selectionArgs == null || selectionArgs.length == 0)
+			return new String[]{id};
+		String[] newArgs = new String[selectionArgs.length+1];
+		for (int i = 0; i < selectionArgs.length; i++) {
+			newArgs[i] = selectionArgs[i];
+		}
+		newArgs[selectionArgs.length] = id;
+		return newArgs;
 	}
 }

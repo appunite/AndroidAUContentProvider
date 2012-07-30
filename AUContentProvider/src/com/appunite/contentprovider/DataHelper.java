@@ -18,6 +18,15 @@ package com.appunite.contentprovider;
 
 public class DataHelper {
 	public static String field(String tableName, String fieldName) {
-		return String.format("%s.%s", tableName, fieldName);
+		return String.format("%s_%s", tableName, fieldName);
 	}
+	
+	public static String contentItemType(String authority, String table) {
+		return String.format("vnd.android.cursor.item/%s.%s", authority, table);
+	}
+	
+	public static String contentType(String authority, String table) {
+		return String.format("vnd.android.cursor.dir/%s.%s", authority, table);
+	}
+	
 }
