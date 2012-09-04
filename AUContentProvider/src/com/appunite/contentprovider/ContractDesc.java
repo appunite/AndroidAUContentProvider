@@ -17,6 +17,7 @@
 package com.appunite.contentprovider;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 
@@ -27,6 +28,8 @@ public class ContractDesc {
 	private final String mTableName;
 	private final String mIdField;
 	protected final List<TableFieldDesc> mTableFieldDescs = new ArrayList<ContractDesc.TableFieldDesc>();
+	public boolean mIsFts = false;
+	private String mGuidField = null;
 	
 	public enum FieldType {
 		TEXT("TEXT"), INTEGER("INTEGER"), REAL("REAL");
@@ -84,7 +87,19 @@ public class ContractDesc {
 			return this;
 		}
 		
+		public Builder setGuidField(String guidFieldName) {
+			if (contractDesc.mGuidField != null)
+				throw new IllegalArgumentException("Guid field already set");
+			contractDesc.mGuidField = guidFieldName;
+			return this.addTableField(guidFieldName, FieldType.TEXT);
+		}
+		
 		public ContractDesc build() {
+			return contractDesc;
+		}
+		
+		public ContractDesc buildFts() {
+			contractDesc.mIsFts  = true;
 			return contractDesc;
 		}
 	}
@@ -106,8 +121,13 @@ public class ContractDesc {
 	
 	public String sqlCreateTable() {
 		StringBuilder sb = new StringBuilder();
-		sb.append("CREATE TABLE ");
+		if (mIsFts) 
+			sb.append("CREATE VIRTUAL TABLE ");
+		else
+			sb.append("CREATE TABLE ");
 		sb.append(mTableName);
+		if (mIsFts)
+			sb.append(" USING FTS3 ");
 		sb.append(" (");
 		sb.append(String.format("%s %s primary key autoincrement, ", mIdField,
 				FieldType.INTEGER.getTypeString()));
@@ -124,5 +144,26 @@ public class ContractDesc {
 		}
 		sb.append(" );");
 		return sb.toString();
+	}
+	
+	public String getTableName() {
+		return mTableName;
+	}
+
+	public String getIdField() {
+		return mIdField;
+	}
+	
+	public Collection<String> getFieldsWithId() {
+		Collection<String> fields = new ArrayList<String>();
+		for (TableFieldDesc desc : mTableFieldDescs) {
+			fields.add(desc.fieldName);
+		}
+		fields.add(mIdField);
+		return fields;
+	}
+	
+	public String getGuidField() {
+		return mGuidField ;
 	}
 }
