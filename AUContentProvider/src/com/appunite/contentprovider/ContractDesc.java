@@ -127,7 +127,7 @@ public class ContractDesc {
 			sb.append("CREATE TABLE ");
 		sb.append(mTableName);
 		if (mIsFts)
-			sb.append(" USING FTS3 ");
+			sb.append(" USING fts3 ");
 		sb.append(" (");
 		sb.append(String.format("%s %s primary key autoincrement, ", mIdField,
 				FieldType.INTEGER.getTypeString()));

@@ -67,6 +67,13 @@ public class ContentProviderHelper {
 			return selection1;
 		return String.format("(%s) && (%s)", selection1, selection2);
 	}
+	
+	public static String[] joinProjections(String[] projection1, String... projection2) {
+		String[] ret = new String[projection1.length + projection2.length];
+		System.arraycopy(projection1, 0, ret, 0, projection1.length);
+		System.arraycopy(projection2, 0, ret, projection1.length, projection2.length);
+		return ret;
+	}
 
 	public static String[] joinSelectionArgs(String[] selectionArgs1,
 			Collection<String> selectionArgs2) {

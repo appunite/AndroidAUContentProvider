@@ -27,7 +27,7 @@ public class ContractFullDesc {
 	private Map<String, String> mFields = new HashMap<String, String>();
 	private Map<String, ProjectionMap> mFinalProjectionMaps = new HashMap<String, ProjectionMap>();
 	private Map<String, ProjectionMap> mSimpleProjectionMaps = new HashMap<String, ProjectionMap>();
-	
+
 	public ContractDesc getContractDesc(String tableName) {
 		return mTables.get(tableName);
 	}
@@ -50,12 +50,12 @@ public class ContractFullDesc {
 			throw new IllegalArgumentException("Unkonwon table " + tableName);
 		builder.addAll(tableProjectionMap);
 		projectionMap = builder.build();
-		
+
 		mFinalProjectionMaps.put(tableName, projectionMap);
 		return projectionMap;
 	}
 
-	private static class ConnectionDesc {
+	public static class ConnectionDesc {
 		String table1;
 		String field1;
 		String tableN;
@@ -127,6 +127,72 @@ public class ContractFullDesc {
 		return builder.build();
 	}
 
+	/**
+	 * Return All joins that have to be processed between two or more tables
+	 * even if there are no direct connection.
+	 * 
+	 * If there are model: books.book_shop_id -> book_shop.id,
+	 * book_shop.book_store_id -> book_store.id. You ask for: book, book_sotre.
+	 * Return: book, book_shop, book_store - because there no dirrect connection
+	 * between book and book_store
+	 * 
+	 * @param toFind tables to find destination
+	 * @param baseTable base table
+	 * @return set of connections to perform tables to find join
+	 */
+	private List<ConnectionDesc> buildJoinArrayFromSet(Set<String> toFind,
+			String baseTable) {
+		Map<String, List<ConnectionDesc>> root = new HashMap<String, List<ConnectionDesc>>();
+		root.put(baseTable, null);
+
+		List<ConnectionDesc> ret = new ArrayList<ConnectionDesc>();
+		Set<ConnectionDesc> retSet = new HashSet<ConnectionDesc>();
+		Set<String> visited = new HashSet<String>();
+
+		while (root.size() > 0 && toFind.size() > 0) {
+			Map<String, List<ConnectionDesc>> newRoot = new HashMap<String, List<ConnectionDesc>>();
+			Iterator<ConnectionDesc> connectionDescsIterator = mConnectionDescs
+					.iterator();
+			while (connectionDescsIterator.hasNext() && toFind.size() > 0) {
+				ConnectionDesc connection = connectionDescsIterator.next();
+				if (!root.containsKey(connection.tableN))
+					continue;
+				if (visited.contains(connection.table1)) {
+					continue;
+				}
+				List<ConnectionDesc> descTree = root.get(connection.tableN);
+				visited.add(connection.table1);
+				if (toFind.contains(connection.table1)) {
+					toFind.remove(connection.table1);
+					if (descTree != null) {
+						for (ConnectionDesc connectionDesc : descTree) {
+							if (retSet.contains(connectionDesc))
+								continue;
+							ret.add(connectionDesc);
+							retSet.add(connectionDesc);
+						}
+					}
+					if (!retSet.contains(connection)) {
+						ret.add(connection);
+						retSet.add(connection);
+					}
+					newRoot.put(connection.table1, null);
+				} else {
+					ArrayList<ConnectionDesc> newDescTree = new ArrayList<ConnectionDesc>();
+					if (descTree != null)
+						newDescTree.addAll(descTree);
+					newDescTree.add(connection);
+					newRoot.put(connection.table1, newDescTree);
+				}
+			}
+			root = newRoot;
+		}
+		if (toFind.size() != 0)
+			throw new RuntimeException("Could not find connection between 1:N"
+					+ toFind + ":" + baseTable);
+		return ret;
+	}
+
 	public void addJoins(String baseTable, StringBuilder sb, String[] projection) {
 		Set<String> tables = new HashSet<String>();
 		for (String field : projection) {
@@ -140,12 +206,10 @@ public class ContractFullDesc {
 		}
 		tables.remove(baseTable);
 
-		for (String table : tables) {
-			ConnectionDesc desc = findConnection(table, baseTable);
-			if (desc == null)
-				throw new IllegalArgumentException(
-						"Wrong where paramters could not connect " + table
-								+ " to table: " + baseTable);
+		List<ConnectionDesc> tablesJoin = buildJoinArrayFromSet(tables,
+				baseTable);
+
+		for (ConnectionDesc desc : tablesJoin) {
 			sb.append(" LEFT OUTER JOIN ");
 			sb.append(desc.table1);
 			sb.append(" ON (");
