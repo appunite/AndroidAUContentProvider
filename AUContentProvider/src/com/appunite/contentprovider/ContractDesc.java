@@ -25,6 +25,8 @@ import android.provider.BaseColumns;
 
 public class ContractDesc {
 	
+	private final String mContentType;
+	private final String mContentItemType;
 	private final String mTableName;
 	private final String mIdField;
 	protected final List<TableFieldDesc> mTableFieldDescs = new ArrayList<ContractDesc.TableFieldDesc>();
@@ -65,16 +67,18 @@ public class ContractDesc {
 		
 	}
 
-	protected ContractDesc(String tableName, String idField) {
+	protected ContractDesc(String tableName, String idField, String contentType, String contentItemType) {
 		this.mTableName = tableName;
 		this.mIdField = idField;
+		this.mContentType = contentType;
+		this.mContentItemType = contentItemType;
 	}
 	
 	public static class Builder {
 		ContractDesc contractDesc;
 		
-		public Builder(String tableName, String idField) {
-			contractDesc = new ContractDesc(tableName, idField);
+		public Builder(String tableName, String idField, String contentType, String contentItemType) {
+			contractDesc = new ContractDesc(tableName, idField, contentType, contentItemType);
 		}
 		
 		public Builder addTableField(String fieldName, FieldType fieldType) {
@@ -154,6 +158,14 @@ public class ContractDesc {
 		return mIdField;
 	}
 	
+	public String getContentType() {
+		return mContentType;
+	}
+
+	public String getContentItemType() {
+		return mContentItemType;
+	}
+
 	public Collection<String> getFieldsWithId() {
 		Collection<String> fields = new ArrayList<String>();
 		for (TableFieldDesc desc : mTableFieldDescs) {

@@ -136,8 +136,10 @@ public class ContractFullDesc {
 	 * Return: book, book_shop, book_store - because there no dirrect connection
 	 * between book and book_store
 	 * 
-	 * @param toFind tables to find destination
-	 * @param baseTable base table
+	 * @param toFind
+	 *            tables to find destination
+	 * @param baseTable
+	 *            base table
 	 * @return set of connections to perform tables to find join
 	 */
 	private List<ConnectionDesc> buildJoinArrayFromSet(Set<String> toFind,
@@ -305,5 +307,28 @@ public class ContractFullDesc {
 
 	private static boolean lastSegmentIsId(List<String> pathSegments) {
 		return pathSegments.size() % 2 == 0;
+	}
+
+	public String getTypeURI(Uri uri) {
+		List<String> pathSegments = uri.getPathSegments();
+		
+		if (pathSegments.size() == 0)
+			throw new IllegalArgumentException("Unknown URI " + uri);
+		
+		boolean isLastSegmentId = lastSegmentIsId(pathSegments);
+		
+		int currentPathSegment = isLastSegmentId ? pathSegments.size() - 2
+				: pathSegments.size() - 1;
+
+		String table = pathSegments.get(currentPathSegment);
+		ContractDesc contractDesc = mTables.get(table);
+		
+		if (contractDesc == null)
+			throw new IllegalArgumentException("Unknown URI " + uri
+					+ " not known table: " + table);
+
+		return isLastSegmentId ? contractDesc.getContentItemType()
+				: contractDesc.getContentType();
+
 	}
 }
