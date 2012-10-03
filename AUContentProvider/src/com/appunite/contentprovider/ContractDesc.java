@@ -32,6 +32,7 @@ public class ContractDesc {
 	protected final List<TableFieldDesc> mTableFieldDescs = new ArrayList<ContractDesc.TableFieldDesc>();
 	public boolean mIsFts = false;
 	private String mGuidField = null;
+	protected final List<FakeFieldDesc> mFakeFieldsDescs = new ArrayList<ContractDesc.FakeFieldDesc>();
 	
 	public enum FieldType {
 		TEXT("TEXT"), INTEGER("INTEGER"), REAL("REAL");
@@ -45,6 +46,18 @@ public class ContractDesc {
 		public String getTypeString() {
 			return mTypeString;
 		}
+	}
+	
+	private static class FakeFieldDesc {
+
+		private final String fieldName;
+		private final String sql;
+
+		public FakeFieldDesc(String fieldName, String sql) {
+			this.fieldName = fieldName;
+			this.sql = sql;
+		}
+		
 	}
 	
 	private static class TableFieldDesc {
@@ -98,6 +111,12 @@ public class ContractDesc {
 			return this.addTableField(guidFieldName, FieldType.TEXT);
 		}
 		
+		public Builder addFakeField(String fieldName, String sql) {
+			FakeFieldDesc fakeFieldDesc = new FakeFieldDesc(fieldName, sql);
+			contractDesc.mFakeFieldsDescs .add(fakeFieldDesc);
+			return this;
+		}
+		
 		public ContractDesc build() {
 			return contractDesc;
 		}
@@ -115,6 +134,11 @@ public class ContractDesc {
 		while (fieldsIter.hasNext()) {
 			TableFieldDesc field = fieldsIter.next();
 			builder.add(field.fieldName);
+		}
+		Iterator<FakeFieldDesc> fakeFieldsIter = mFakeFieldsDescs.iterator();
+		while (fakeFieldsIter.hasNext()) {
+			FakeFieldDesc fakeFieldDesc = fakeFieldsIter.next();
+			builder.add(fakeFieldDesc.fieldName, fakeFieldDesc.sql);
 		}
 		return builder.build();
 	}
@@ -169,6 +193,9 @@ public class ContractDesc {
 	public Collection<String> getFieldsWithId() {
 		Collection<String> fields = new ArrayList<String>();
 		for (TableFieldDesc desc : mTableFieldDescs) {
+			fields.add(desc.fieldName);
+		}
+		for (FakeFieldDesc desc : mFakeFieldsDescs) {
 			fields.add(desc.fieldName);
 		}
 		fields.add(mIdField);
