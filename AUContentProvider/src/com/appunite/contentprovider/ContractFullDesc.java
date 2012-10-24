@@ -12,13 +12,9 @@ import java.util.Set;
 import android.net.Uri;
 import android.provider.BaseColumns;
 import android.text.TextUtils;
-import android.util.Log;
 
 public class ContractFullDesc {
-	private static final String TAG = ConnectionDesc.class.getCanonicalName();
-
 	private ContractFullDesc() {
-
 	}
 
 	private final Collection<ConnectionDesc> mConnectionDescs = new ArrayList<ContractFullDesc.ConnectionDesc>();
@@ -290,8 +286,6 @@ public class ContractFullDesc {
 		vars.selection = where.toString();
 		if (TextUtils.isEmpty(where))
 			vars.selection = null;
-		if (BuildConfig.DEBUG)
-			Log.v(TAG, String.format("Selection: %s", vars.selection));
 		return vars;
 	}
 
