@@ -21,6 +21,7 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 
+import android.database.sqlite.SQLiteDatabase;
 import android.provider.BaseColumns;
 
 public class ContractDesc {
@@ -143,11 +144,13 @@ public class ContractDesc {
 		return builder.build();
 	}
 	
-	public String sqlDropTable() {
+	
+	
+	private String sqlDropTableQuery() {
 		return String.format("DROP TABLE IF EXISTS %s", mTableName);
 	}
 	
-	public String sqlCreateTable() {
+	private String sqlCreateTableQuery() {
 		StringBuilder sb = new StringBuilder();
 		if (mIsFts) 
 			sb.append("CREATE VIRTUAL TABLE ");
@@ -173,6 +176,32 @@ public class ContractDesc {
 		sb.append(" );");
 		return sb.toString();
 	}
+	
+	public void sqlDropTable(SQLiteDatabase db) {
+		db.execSQL(sqlDropTableQuery());
+	}
+	
+	public void sqlCreateTable(SQLiteDatabase db) {
+		db.execSQL(sqlCreateTableQuery());
+		if (!mIsFts) {
+			if (mGuidField != null) {
+				String sql = DataHelper.createBinaryUniqueIndexIfNotExist(
+						mTableName, mGuidField);
+				db.execSQL(sql);
+			}
+		}
+	}
+	
+	@Deprecated
+	public String sqlDropTable() {
+		return sqlDropTableQuery();
+	}
+	
+	@Deprecated
+	public String sqlCreateTable() {
+		return sqlDropTableQuery();
+	}
+	
 	
 	public String getTableName() {
 		return mTableName;

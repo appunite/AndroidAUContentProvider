@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
 import android.provider.BaseColumns;
 import android.text.TextUtils;
@@ -324,5 +325,69 @@ public class ContractFullDesc {
 		return isLastSegmentId ? contractDesc.getContentItemType()
 				: contractDesc.getContentType();
 
+	}
+	
+	private static class TableField {
+		final String table;
+		final String field;
+		
+		public TableField(String table, String field) {
+			this.table = table;
+			this.field = field;
+			if (table == null) {
+				throw new NullPointerException();
+			}
+			if (field == null) {
+				throw new NullPointerException();
+			}
+		}
+		@Override
+		public boolean equals(Object o) {
+			if (this == o)
+				return true;
+			if (!(o instanceof TableField))
+				return false;
+			TableField obj = (TableField) o;
+			if (table == null ? obj.table != null : !table.equals(obj.table)) {
+				return false;
+			}
+			if (field == null ? obj.field != null : !field.equals(obj.field)) {
+				return false;
+			}
+			return true;
+		}
+	}
+	
+	public void sqlCreateAll(SQLiteDatabase db) {
+		for (ContractDesc contractDesc : mTables.values()) {
+			contractDesc.sqlCreateTable(db);
+		}
+		Set<TableField> fieldSet = new HashSet<TableField>();
+		for (ConnectionDesc connectionDesc : mConnectionDescs) {
+			String tableN = connectionDesc.tableN;
+			String fieldN = connectionDesc.fieldN;
+			fieldSet.add(new TableField(tableN, fieldN));
+		}
+		for (TableField tableField : fieldSet) {
+			ContractDesc contractDesc = mTables.get(tableField.table);
+			if (contractDesc.mIsFts) {
+				continue;
+			}
+			if (contractDesc.getIdField().equals(tableField.field)) {
+				continue;
+			}
+			String guidField = contractDesc.getGuidField();
+			if (guidField != null && guidField.equals(tableField.field)) {
+				continue;
+			}
+			DataHelper.createBinaryUniqueIndexIfNotExist(tableField.table,
+					tableField.field);
+		}
+	}
+	
+	public void sqlDropAll(SQLiteDatabase db) {
+		for (ContractDesc contractDesc : mTables.values()) {
+			contractDesc.sqlDropTable(db);
+		}
 	}
 }

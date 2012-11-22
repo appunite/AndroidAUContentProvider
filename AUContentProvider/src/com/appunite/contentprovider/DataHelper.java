@@ -28,5 +28,12 @@ public class DataHelper {
 	public static String contentType(String authority, String table) {
 		return String.format("vnd.android.cursor.dir/%s.%s", authority, table);
 	}
+
+	public static String createBinaryUniqueIndexIfNotExist(String tableName,
+			String columnName) {
+		String indexName = String.format("%s_%s", tableName, columnName);
+		return String.format("CREATE UNIQUE INDEX IF NOT EXISTS %s ON %s (%s COLLATE BINARY ASC)",
+				indexName, tableName, columnName);
+	}
 	
 }
