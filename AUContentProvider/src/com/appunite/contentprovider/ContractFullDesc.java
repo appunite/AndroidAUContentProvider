@@ -251,7 +251,7 @@ public class ContractFullDesc {
 		}
 
 		String tableN = vars.table;
-		while (currentPathSegment >= 0) {
+		if (currentPathSegment >= 0) {
 			String id = pathSegments.get(currentPathSegment--);
 			String table1 = pathSegments.get(currentPathSegment--);
 			ContractDesc contractDesc = mTables.get(table1);
@@ -265,23 +265,31 @@ public class ContractFullDesc {
 						+ " could not connect" + tableN + " with table "
 						+ table1);
 
-			if (tableN == vars.table)
-				where.append(" && ");
-			where.append(connection.fieldN);
-			where.append(" IN ( SELECT ");
-			where.append(connection.field1);
-			where.append(" FROM ");
-			where.append(connection.table1);
-			where.append(" WHERE (");
-			where.append(contractDesc.getIdField());
-			where.append(" = ? )");
-			toClose += 1;
+			if (toClose > 0) {
+				where.append(" AND ");
+			}
+			
+			if (contractDesc.getIdField().equals(connection.field1)) {
+				// if field that we using for join is same as "id" we do not
+				// have to ask database for value to create join
+				where.append("(");
+				where.append(connection.fieldN);
+				where.append(" == ? ");
+			} else {
+				where.append(connection.fieldN);
+				where.append(" IN ( SELECT ");
+				where.append(connection.field1);
+				where.append(" FROM ");
+				where.append(connection.table1);
+				where.append(" WHERE (");
+				where.append(contractDesc.getIdField());
+				where.append(" = ? )");
+			}
 			vars.selectionArgs.add(id);
-
+			toClose += 1;
 			tableN = table1;
 		}
-		while (toClose > 0) {
-			toClose--;
+		for (;toClose > 0; toClose--) {
 			where.append(")");
 		}
 		vars.selection = where.toString();
