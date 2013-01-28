@@ -113,6 +113,8 @@ public class ContractFullDesc {
 		public String table;
 		public String selection = null;
 		public Collection<String> selectionArgs = new ArrayList<String>();
+		public String insertField;
+		public String insertValue;
 	}
 
 	public ProjectionMap buildProjectionMap() {
@@ -221,6 +223,8 @@ public class ContractFullDesc {
 
 	public SelectionVars getSelectionVarsFromUri(Uri uri) {
 		SelectionVars vars = new SelectionVars();
+		vars.insertField = null;
+		vars.insertValue = null;
 		StringBuilder where = new StringBuilder();
 		List<String> pathSegments = uri.getPathSegments();
 		int currentPathSegment = pathSegments.size() - 1;
@@ -275,6 +279,8 @@ public class ContractFullDesc {
 				where.append("(");
 				where.append(connection.fieldN);
 				where.append(" == ? ");
+				vars.insertField = connection.fieldN;
+				vars.insertValue = id;
 			} else {
 				where.append(connection.fieldN);
 				where.append(" IN ( SELECT ");

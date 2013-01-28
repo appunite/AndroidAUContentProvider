@@ -116,4 +116,5 @@ public class ContentProviderHelper {
 		newArgs[selectionArgs.length] = id;
 		return newArgs;
 	}
+	
 }
