@@ -67,13 +67,41 @@ public class ContractFullDesc {
 
 	public static class Builder {
 		private ContractFullDesc mDesc;
+		private Set<String> mTablesNames;
+		private Set<String> mFields;
 
 		public Builder(String authority) {
 			mDesc = new ContractFullDesc();
 			mDesc.mAuthority = authority;
+			mTablesNames = new HashSet<String>();
+			mFields = new HashSet<String>();
+		}
+
+		private void checkIfTableNameExistAndAdd(String tableName) {
+			if (mTablesNames.contains(tableName)) {
+				throw new IllegalArgumentException(String.format(
+						"Table %s already exist in contract", tableName));
+			}
+			mTablesNames.add(tableName);
+		}
+		
+		private void checkIfFieldExistAndAdd(String fieldName) {
+			if (mFields.contains(fieldName)) {
+				throw new IllegalArgumentException(String.format(
+						"Field %s already exist in some table", fieldName));
+			}
+			mFields.add(fieldName);
+		}
+		
+		private void checkIfFieldsExistAndAdd(Collection<String> fields) {
+			for (String fieldName : fields) {
+				checkIfFieldExistAndAdd(fieldName);
+			}
 		}
 
 		public Builder addTable(ContractDesc table) {
+			checkIfTableNameExistAndAdd(table.getTableName());
+			checkIfFieldsExistAndAdd(table.getFieldsWithId());
 			mDesc.addTable(table);
 			return this;
 		}

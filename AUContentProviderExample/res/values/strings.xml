@@ -1,4 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">Main</string>
+
+    <!-- Main configuration -->
+    <string name="app_name">AUContentProviderExample</string>
+    
+    <!-- Permissions -->
+    <string name="permission_read_content_provider_label">Read Example Data</string>
+    <string name="permission_read_content_provider_description">Allows the app to read you Example data, including books and authors.</string>
+    <string name="permission_write_content_provider_label">Read Example Data</string>
+    <string name="permission_write_content_provider_description">Allows the app to write you Example data, including creating books and authors.</string>
+
 </resources>

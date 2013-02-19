@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012 Jacek Marchwicki <jacek.marchwicki@gmail.com>
+ * Copyright (C) 2013 Jacek Marchwicki <jacek.marchwicki@gmail.com>
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,25 +13,24 @@
  * See the License for the specific language governing permissions and
  * limitations under the License
  */
+package com.example.contentprovider.content;
 
-package com.example.contentprovider;
+import android.content.Context;
+import android.database.sqlite.SQLiteOpenHelper;
 
-import android.app.Activity;
-import android.os.Bundle;
+import com.appunite.contentprovider.BaseContentProvider;
+import com.appunite.contentprovider.ContractFullDesc;
 
-public class Main extends Activity {
+public class AppProvider extends BaseContentProvider {
+
 	@Override
-	public void onCreate(Bundle savedInstanceState) {
-		super.onCreate(savedInstanceState);
-		setContentView(R.layout.main);
-
-		new Thread(new Runnable() {
-
-			@Override
-			public void run() {
-				SampleExample example = new SampleExample(getContentResolver());
-				example.fillExampleData();
-			}
-		}).start();
+	protected ContractFullDesc getFullDesc() {
+		return DBHelper.FULL_DESC;
 	}
+
+	@Override
+	protected SQLiteOpenHelper createSQLiteOpenHelper(Context context) {
+		return new DBHelper(context);
+	}
+
 }

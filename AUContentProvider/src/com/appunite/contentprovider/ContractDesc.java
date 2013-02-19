@@ -18,8 +18,10 @@ package com.appunite.contentprovider;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 
 import android.database.sqlite.SQLiteDatabase;
 import android.provider.BaseColumns;
@@ -89,42 +91,57 @@ public class ContractDesc {
 	}
 	
 	public static class Builder {
-		ContractDesc contractDesc;
+		private ContractDesc mContractDesc;
+		private Set<String> mFields; 
 		
 		public Builder(String tableName, String idField, String contentType, String contentItemType) {
-			contractDesc = new ContractDesc(tableName, idField, contentType, contentItemType);
+			mContractDesc = new ContractDesc(tableName, idField, contentType, contentItemType);
+			mFields = new HashSet<String>();;
+			mFields.add(idField);
+		}
+		
+		private void checkIfFieldExistAndAdd(String fieldName) {
+			if (mFields.contains(fieldName)) {
+				throw new IllegalArgumentException(String.format(
+						"Field %s already exist in table", fieldName));
+			}
+			mFields.add(fieldName);
 		}
 		
 		public Builder addTableField(String fieldName, FieldType fieldType) {
-			contractDesc.mTableFieldDescs.add(new TableFieldDesc(fieldName, fieldType));
+			checkIfFieldExistAndAdd(fieldName);
+			mContractDesc.mTableFieldDescs.add(new TableFieldDesc(fieldName, fieldType));
 			return this;
 		}
+
 		
 		public Builder addTableNotNullField(String fieldName, FieldType fieldType) {
-			contractDesc.mTableFieldDescs.add(new TableFieldDesc(fieldName, fieldType, true));
+			checkIfFieldExistAndAdd(fieldName);
+			mContractDesc.mTableFieldDescs.add(new TableFieldDesc(fieldName, fieldType, true));
 			return this;
 		}
 		
 		public Builder setGuidField(String guidFieldName) {
-			if (contractDesc.mGuidField != null)
+			if (mContractDesc.mGuidField != null)
 				throw new IllegalArgumentException("Guid field already set");
-			contractDesc.mGuidField = guidFieldName;
+			mContractDesc.mGuidField = guidFieldName;
 			return this.addTableField(guidFieldName, FieldType.TEXT);
 		}
 		
 		public Builder addFakeField(String fieldName, String sql) {
+			checkIfFieldExistAndAdd(fieldName);
 			FakeFieldDesc fakeFieldDesc = new FakeFieldDesc(fieldName, sql);
-			contractDesc.mFakeFieldsDescs .add(fakeFieldDesc);
+			mContractDesc.mFakeFieldsDescs.add(fakeFieldDesc);
 			return this;
 		}
 		
 		public ContractDesc build() {
-			return contractDesc;
+			return mContractDesc;
 		}
 		
 		public ContractDesc buildFts() {
-			contractDesc.mIsFts  = true;
-			return contractDesc;
+			mContractDesc.mIsFts  = true;
+			return mContractDesc;
 		}
 	}
 	
