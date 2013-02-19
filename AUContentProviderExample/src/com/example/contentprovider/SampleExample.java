@@ -8,6 +8,7 @@ import android.content.ContentProviderOperation;
 import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.OperationApplicationException;
+import android.database.Cursor;
 import android.net.Uri;
 import android.os.RemoteException;
 import android.provider.BaseColumns;
@@ -52,32 +53,36 @@ public class SampleExample {
 
 		// You can even sort by remote field - remember that you have to have
 		// this remote field in projection
-		mCr.query(AppContract.Author.CONTENT_URI, new String[] {
+		Cursor q1 = mCr.query(AppContract.Author.CONTENT_URI, new String[] {
 				BaseColumns._ID, AppContract.Author.AUTHOR_ID,
 				AppContract.Author.NAME, AppContract.Book.NAME }, null, null,
 				AppContract.Book.NAME + " ASC");
+		q1.close();
 
 		// You can have selection by remote field - remember that you have to
 		// have this remote field in projection
-		mCr.query(AppContract.Author.CONTENT_URI, new String[] {
+		Cursor q2 = mCr.query(AppContract.Author.CONTENT_URI, new String[] {
 				BaseColumns._ID, AppContract.Author.AUTHOR_ID,
 				AppContract.Author.NAME, AppContract.Book.NAME },
 				AppContract.Book.NAME + " != ?",
 				new String[] { "Some author 2" }, null);
+		q2.close();
 
 		// When you want to append projection for speciffic query you can use
 		// joinProjections method
 		String[] PROJECTION = new String[] { BaseColumns._ID,
 				AppContract.Author.AUTHOR_ID, AppContract.Author.NAME };
-		mCr.query(AppContract.Author.CONTENT_URI,
+		Cursor q3 = mCr.query(AppContract.Author.CONTENT_URI,
 				joinProjections(PROJECTION, AppContract.Book.NAME),
 				AppContract.Book.NAME + " != ?",
 				new String[] { "Some author 2" }, null);
+		q3.close();
 
 		// You can use fake sql fields too
-		mCr.query(AppContract.Book.CONTENT_URI, new String[] {
+		Cursor q4 = mCr.query(AppContract.Book.CONTENT_URI, new String[] {
 				AppContract.Book.BOOK_ID, AppContract.Book.AUTHORS_COUNT },
 				null, null, null);
+		q4.close();
 	}
 
 	private void remoteServerParseExample() {

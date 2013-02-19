@@ -1,3 +1,19 @@
+/*
+ * Copyright (C) 2013 Jacek Marchwicki <jacek.marchwicki@gmail.com>
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License
+ */
+
 package com.appunite.contentprovider;
 
 import java.util.ArrayList;
@@ -138,11 +154,39 @@ public class ContractFullDesc {
 	}
 
 	public static class SelectionVars {
-		public String table;
-		public String selection = null;
-		public Collection<String> selectionArgs = new ArrayList<String>();
-		public String insertField;
-		public String insertValue;
+		public String getTable() {
+			return mTable;
+		}
+		public String getSelection() {
+			return mSelection;
+		}
+		public Collection<String> getSelectionArgs() {
+			return mSelectionArgs;
+		}
+		public String getInsertField() {
+			return mInsertField;
+		}
+		public String getInsertValue() {
+			return mInsertValue;
+		}
+		public ContractDesc getContractDesc() {
+			return mContractDesc;
+		}
+		private final String mTable;
+		private final String mSelection;
+		private final Collection<String> mSelectionArgs;
+		private final String mInsertField;
+		private final String mInsertValue;
+		private final ContractDesc mContractDesc;
+		
+		public SelectionVars(String table, String selection, Collection<String> selectionArgs, String insertField, String insertValue, ContractDesc contractDesc) {
+			mTable = table;
+			mSelection = selection;
+			mSelectionArgs = selectionArgs;
+			mInsertField = insertField;
+			mInsertValue = insertValue;
+			mContractDesc = contractDesc;
+		}
 	}
 
 	public ProjectionMap buildProjectionMap() {
@@ -250,9 +294,14 @@ public class ContractFullDesc {
 	}
 
 	public SelectionVars getSelectionVarsFromUri(Uri uri) {
-		SelectionVars vars = new SelectionVars();
-		vars.insertField = null;
-		vars.insertValue = null;
+		String insertField = null;
+		String insertValue = null;
+		String table;
+		ContractDesc contractDesc;
+		Collection<String> selectionArgs = new ArrayList<String>();
+//		SelectionVars vars = new SelectionVars();
+//		vars.mInsertField = null;
+//		vars.mInsertValue = null;
 		StringBuilder where = new StringBuilder();
 		List<String> pathSegments = uri.getPathSegments();
 		int currentPathSegment = pathSegments.size() - 1;
@@ -263,31 +312,31 @@ public class ContractFullDesc {
 
 		if (lastSegmentIsId(pathSegments)) {
 			String id = pathSegments.get(currentPathSegment--);
-			vars.table = pathSegments.get(currentPathSegment--);
-			ContractDesc contractDesc = mTables.get(vars.table);
+			table = pathSegments.get(currentPathSegment--);
+			contractDesc = mTables.get(table);
 			if (contractDesc == null)
 				throw new IllegalArgumentException("Unknown URI " + uri
-						+ " not known table: " + vars.table);
+						+ " not known table: " + table);
 			toClose += 1;
 			where.append("((");
 			where.append(contractDesc.getIdField());
 			where.append(" == ? )");
 
-			vars.selectionArgs.add(id);
+			selectionArgs.add(id);
 		} else {
-			vars.table = pathSegments.get(currentPathSegment--);
-			ContractDesc contractDesc = mTables.get(vars.table);
+			table = pathSegments.get(currentPathSegment--);
+			contractDesc = mTables.get(table);
 			if (contractDesc == null)
 				throw new IllegalArgumentException("Unknown URI " + uri
-						+ " not known table: " + vars.table);
+						+ " not known table: " + table);
 		}
 
-		String tableN = vars.table;
+		String tableN = table;
 		if (currentPathSegment >= 0) {
 			String id = pathSegments.get(currentPathSegment--);
 			String table1 = pathSegments.get(currentPathSegment--);
-			ContractDesc contractDesc = mTables.get(table1);
-			if (contractDesc == null)
+			ContractDesc contractDesc1 = mTables.get(table1);
+			if (contractDesc1 == null)
 				throw new IllegalArgumentException("Unknown URI " + uri
 						+ " not known table: " + table1);
 
@@ -301,14 +350,14 @@ public class ContractFullDesc {
 				where.append(" AND ");
 			}
 			
-			if (contractDesc.getIdField().equals(connection.field1)) {
+			if (contractDesc1.getIdField().equals(connection.field1)) {
 				// if field that we using for join is same as "id" we do not
 				// have to ask database for value to create join
 				where.append("(");
 				where.append(connection.fieldN);
 				where.append(" == ? ");
-				vars.insertField = connection.fieldN;
-				vars.insertValue = id;
+				insertField = connection.fieldN;
+				insertValue = id;
 			} else {
 				where.append(connection.fieldN);
 				where.append(" IN ( SELECT ");
@@ -316,20 +365,21 @@ public class ContractFullDesc {
 				where.append(" FROM ");
 				where.append(connection.table1);
 				where.append(" WHERE (");
-				where.append(contractDesc.getIdField());
+				where.append(contractDesc1.getIdField());
 				where.append(" = ? )");
 			}
-			vars.selectionArgs.add(id);
+			selectionArgs.add(id);
 			toClose += 1;
 			tableN = table1;
 		}
 		for (;toClose > 0; toClose--) {
 			where.append(")");
 		}
-		vars.selection = where.toString();
+		String selection = where.toString();
 		if (TextUtils.isEmpty(where))
-			vars.selection = null;
-		return vars;
+			selection = null;
+		return new SelectionVars(table, selection, selectionArgs, insertField,
+				insertValue, contractDesc);
 	}
 
 	private ConnectionDesc findConnection(String table1, String tableN) {

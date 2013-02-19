@@ -32,10 +32,15 @@ public class ContractDesc {
 	private final String mContentItemType;
 	private final String mTableName;
 	private final String mIdField;
-	protected final List<TableFieldDesc> mTableFieldDescs = new ArrayList<ContractDesc.TableFieldDesc>();
-	public boolean mIsFts = false;
 	private String mGuidField = null;
-	protected final List<FakeFieldDesc> mFakeFieldsDescs = new ArrayList<ContractDesc.FakeFieldDesc>();
+	
+	boolean mIsFts = false;
+	final List<TableFieldDesc> mTableFieldDescs = new ArrayList<ContractDesc.TableFieldDesc>();
+	final List<FakeFieldDesc> mFakeFieldsDescs = new ArrayList<ContractDesc.FakeFieldDesc>();
+	ArrayList<OnInsertTrigger> mOnInsertTriggers = new ArrayList<OnInsertTrigger>();
+	ArrayList<OnUpdateTrigger> mOnUpdateTriggers = new ArrayList<OnUpdateTrigger>();
+	ArrayList<OnDeleteTrigger> mOnDeleteTriggers = new ArrayList<OnDeleteTrigger>();
+	ArrayList<OnAfterInsertTrigger> mOnAfterInsertTriggers = new ArrayList<OnAfterInsertTrigger>();
 	
 	public enum FieldType {
 		TEXT("TEXT"), INTEGER("INTEGER"), REAL("REAL");
@@ -125,6 +130,7 @@ public class ContractDesc {
 			if (mContractDesc.mGuidField != null)
 				throw new IllegalArgumentException("Guid field already set");
 			mContractDesc.mGuidField = guidFieldName;
+			mContractDesc.mOnInsertTriggers.add(new GuidOnInsertTrigger(guidFieldName));
 			return this.addTableField(guidFieldName, FieldType.TEXT);
 		}
 		
@@ -132,6 +138,26 @@ public class ContractDesc {
 			checkIfFieldExistAndAdd(fieldName);
 			FakeFieldDesc fakeFieldDesc = new FakeFieldDesc(fieldName, sql);
 			mContractDesc.mFakeFieldsDescs.add(fakeFieldDesc);
+			return this;
+		}
+		
+		public Builder addOnInsertTrigger(OnInsertTrigger onInsertTrigger) {
+			mContractDesc.mOnInsertTriggers.add(onInsertTrigger);
+			return this;
+		}
+		
+		public Builder addOnUpdateTrigger(OnUpdateTrigger onUpdateTrigger) {
+			mContractDesc.mOnUpdateTriggers.add(onUpdateTrigger);
+			return this;
+		}
+		
+		public Builder addOnDeleteTrigger(OnDeleteTrigger onDeleteTrigger) {
+			mContractDesc.mOnDeleteTriggers.add(onDeleteTrigger);
+			return this;
+		}
+		
+		public Builder addOnAfterInsertTrigger(OnAfterInsertTrigger onAfterInsertTrigger) {
+			mContractDesc.mOnAfterInsertTriggers.add(onAfterInsertTrigger);
 			return this;
 		}
 		

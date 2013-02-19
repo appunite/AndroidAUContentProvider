@@ -42,6 +42,8 @@ public class AppContract {
 		public static final String NAME = DataHelper.field(DB_TABLE, "name");
 		public static final String AUTHORS_COUNT = DataHelper.field(DB_TABLE, "authors_count");
 		public static final String SYNC_TOKEN = DataHelper.field(DB_TABLE, "sync_token");
+		public static final String CREATED_AT = DataHelper.field(DB_TABLE, "created_at");
+		public static final String UPDATED_AT = DataHelper.field(DB_TABLE, "updated_at");
 	}
 	
 	public static class Author implements BaseColumns {
@@ -61,6 +63,8 @@ public class AppContract {
 		public static final String GUID = DataHelper.field(DB_TABLE, "guid");
 		public static final String NAME = DataHelper.field(DB_TABLE, "name");
 		public static final String SYNC_TOKEN = DataHelper.field(DB_TABLE, "sync_token");
+		public static final String CREATED_AT = DataHelper.field(DB_TABLE, "created_at");
+		public static final String UPDATED_AT = DataHelper.field(DB_TABLE, "updated_at");
 	}
 
 }
