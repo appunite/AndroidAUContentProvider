@@ -130,7 +130,11 @@ public abstract class BaseContentProvider extends ContentProvider implements
 		for (OnDeleteTrigger trigger : contractDesc.mOnDeleteTriggers) {
 			trigger.onDelete(this, uri, selectionVars, selection, selectionArgs);
 		}
-		return delete(selectionVars.getTable(), selection, selectionArgs);
+		int result = delete(selectionVars.getTable(), selection, selectionArgs);
+		for (OnAfterDeleteTrigger trigger : contractDesc.mOnAfterDeleteTriggers) {
+			trigger.onDelete(this, uri, selectionVars, selection, selectionArgs);
+		}
+		return result;
 	}
 
 	@Override
@@ -264,6 +268,7 @@ public abstract class BaseContentProvider extends ContentProvider implements
 		String table = selectionVars.getTable();
 		ContractDesc contractDesc = selectionVars.getContractDesc();
 		ArrayList<OnUpdateTrigger> triggers = contractDesc.mOnUpdateTriggers;
+		ArrayList<OnAfterUpdateTrigger> afterTriggers = contractDesc.mOnAfterUpdateTriggers;
 		SQLiteDatabase db = getDb();
 
 		boolean doLocalTransaction = !db.inTransaction() && triggers.size() > 0;
@@ -277,6 +282,9 @@ public abstract class BaseContentProvider extends ContentProvider implements
 			}
 
 			int result = update(table, values, selection, selectionArgs);
+			for (OnAfterUpdateTrigger trigger : afterTriggers) {
+				trigger.onUpdate(this, uri, selectionVars, values, selection, selectionArgs);
+			}
 			return result;
 		} finally {
 			if (doLocalTransaction) {

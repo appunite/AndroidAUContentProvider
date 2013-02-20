@@ -41,6 +41,8 @@ public class ContractDesc {
 	ArrayList<OnUpdateTrigger> mOnUpdateTriggers = new ArrayList<OnUpdateTrigger>();
 	ArrayList<OnDeleteTrigger> mOnDeleteTriggers = new ArrayList<OnDeleteTrigger>();
 	ArrayList<OnAfterInsertTrigger> mOnAfterInsertTriggers = new ArrayList<OnAfterInsertTrigger>();
+	ArrayList<OnAfterUpdateTrigger> mOnAfterUpdateTriggers = new ArrayList<OnAfterUpdateTrigger>();
+	ArrayList<OnAfterDeleteTrigger> mOnAfterDeleteTriggers = new ArrayList<OnAfterDeleteTrigger>();
 	
 	public enum FieldType {
 		TEXT("TEXT"), INTEGER("INTEGER"), REAL("REAL");
@@ -158,6 +160,16 @@ public class ContractDesc {
 		
 		public Builder addOnAfterInsertTrigger(OnAfterInsertTrigger onAfterInsertTrigger) {
 			mContractDesc.mOnAfterInsertTriggers.add(onAfterInsertTrigger);
+			return this;
+		}
+		
+		public Builder addOnAfterUpdateTrigger(OnAfterUpdateTrigger onAfterUpdateTrigger) {
+			mContractDesc.mOnAfterUpdateTriggers.add(onAfterUpdateTrigger);
+			return this;
+		}
+		
+		public Builder addOnAfterDeleteTrigger(OnAfterDeleteTrigger onAfterDeleteTrigger) {
+			mContractDesc.mOnAfterDeleteTriggers.add(onAfterDeleteTrigger);
 			return this;
 		}
 		
