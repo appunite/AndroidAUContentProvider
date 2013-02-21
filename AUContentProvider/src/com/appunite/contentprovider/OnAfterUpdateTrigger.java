@@ -22,7 +22,7 @@ import android.net.Uri;
 import com.appunite.contentprovider.ContractFullDesc.SelectionVars;
 
 public interface OnAfterUpdateTrigger {
-	public void onUpdate(QueryInterface queryInterface, Uri uri,
+	public void onAfterUpdate(QueryInterface queryInterface, Uri uri,
 			SelectionVars selectionVars, ContentValues newValues,
 			String selection, String[] selectionArgs);
 }

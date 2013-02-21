@@ -21,7 +21,7 @@ import android.net.Uri;
 import com.appunite.contentprovider.ContractFullDesc.SelectionVars;
 
 public interface OnAfterDeleteTrigger {
-	public void onDelete(QueryInterface queryInterface, Uri uri,
+	public void onAfterDelete(QueryInterface queryInterface, Uri uri,
 			SelectionVars selectionVars, String selection,
 			String[] selectionArgs);
 }

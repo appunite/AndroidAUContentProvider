@@ -22,6 +22,6 @@ import android.content.ContentValues;
 import android.net.Uri;
 
 public interface OnAfterInsertTrigger {
-	public void onInsert(QueryInterface queryInterface, Uri uri,
+	public void onAfterInsert(QueryInterface queryInterface, Uri uri,
 			SelectionVars selectionVars, long id, ContentValues newValues);
 }

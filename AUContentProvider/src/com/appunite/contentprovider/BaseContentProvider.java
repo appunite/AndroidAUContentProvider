@@ -132,7 +132,7 @@ public abstract class BaseContentProvider extends ContentProvider implements
 		}
 		int result = delete(selectionVars.getTable(), selection, selectionArgs);
 		for (OnAfterDeleteTrigger trigger : contractDesc.mOnAfterDeleteTriggers) {
-			trigger.onDelete(this, uri, selectionVars, selection, selectionArgs);
+			trigger.onAfterDelete(this, uri, selectionVars, selection, selectionArgs);
 		}
 		return result;
 	}
@@ -169,7 +169,7 @@ public abstract class BaseContentProvider extends ContentProvider implements
 			long id = insertOrThrow(table, null, values);
 			Uri newUri = Uri.withAppendedPath(uri, Long.toString(id));
 			for (OnAfterInsertTrigger trigger : afterTriggers) {
-				trigger.onInsert(this, newUri, selectionVars, id, values);
+				trigger.onAfterInsert(this, newUri, selectionVars, id, values);
 			}
 			return newUri;
 		} finally {
@@ -283,7 +283,7 @@ public abstract class BaseContentProvider extends ContentProvider implements
 
 			int result = update(table, values, selection, selectionArgs);
 			for (OnAfterUpdateTrigger trigger : afterTriggers) {
-				trigger.onUpdate(this, uri, selectionVars, values, selection, selectionArgs);
+				trigger.onAfterUpdate(this, uri, selectionVars, values, selection, selectionArgs);
 			}
 			return result;
 		} finally {
