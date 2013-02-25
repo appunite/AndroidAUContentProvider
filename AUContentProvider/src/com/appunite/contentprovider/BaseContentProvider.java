@@ -126,15 +126,39 @@ public abstract class BaseContentProvider extends ContentProvider implements
 				selectionVars.getSelection());
 		selectionArgs = ContentProviderHelper.joinSelectionArgs(selectionArgs,
 				selectionVars.getSelectionArgs());
+
 		ContractDesc contractDesc = selectionVars.getContractDesc();
-		for (OnDeleteTrigger trigger : contractDesc.mOnDeleteTriggers) {
-			trigger.onDelete(this, uri, selectionVars, selection, selectionArgs);
+		ArrayList<OnDeleteTrigger> triggers = contractDesc.mOnDeleteTriggers;
+		ArrayList<OnAfterDeleteTrigger> afterTriggers = contractDesc.mOnAfterDeleteTriggers;
+
+		SQLiteDatabase db = getDb();
+		boolean doLocalTranasaction = !db.inTransaction()
+				&& (triggers.size() > 0 || afterTriggers.size() > 0);
+		if (doLocalTranasaction) {
+			db.beginTransaction();
 		}
-		int result = delete(selectionVars.getTable(), selection, selectionArgs);
-		for (OnAfterDeleteTrigger trigger : contractDesc.mOnAfterDeleteTriggers) {
-			trigger.onAfterDelete(this, uri, selectionVars, selection, selectionArgs);
+		try {
+			for (OnDeleteTrigger trigger : contractDesc.mOnDeleteTriggers) {
+				trigger.onDelete(this, uri, selectionVars, selection,
+						selectionArgs);
+			}
+
+			int result = delete(selectionVars.getTable(), selection,
+					selectionArgs);
+
+			for (OnAfterDeleteTrigger trigger : contractDesc.mOnAfterDeleteTriggers) {
+				trigger.onAfterDelete(this, uri, selectionVars, selection,
+						selectionArgs);
+			}
+			if (doLocalTranasaction) {
+				db.setTransactionSuccessful();
+			}
+			return result;
+		} finally {
+			if (doLocalTranasaction) {
+				db.endTransaction();
+			}
 		}
-		return result;
 	}
 
 	@Override
@@ -162,6 +186,9 @@ public abstract class BaseContentProvider extends ContentProvider implements
 			for (OnInsertTrigger trigger : triggers) {
 				Uri newUri = trigger.onInsert(this, uri, selectionVars, values);
 				if (newUri != null) {
+					if (doLocalTransaction) {
+						db.setTransactionSuccessful();
+					}
 					return newUri;
 				}
 			}
@@ -170,6 +197,9 @@ public abstract class BaseContentProvider extends ContentProvider implements
 			Uri newUri = Uri.withAppendedPath(uri, Long.toString(id));
 			for (OnAfterInsertTrigger trigger : afterTriggers) {
 				trigger.onAfterInsert(this, newUri, selectionVars, id, values);
+			}
+			if (doLocalTransaction) {
+				db.setTransactionSuccessful();
 			}
 			return newUri;
 		} finally {
@@ -283,7 +313,12 @@ public abstract class BaseContentProvider extends ContentProvider implements
 
 			int result = update(table, values, selection, selectionArgs);
 			for (OnAfterUpdateTrigger trigger : afterTriggers) {
-				trigger.onAfterUpdate(this, uri, selectionVars, values, selection, selectionArgs);
+				trigger.onAfterUpdate(this, uri, selectionVars, values,
+						selection, selectionArgs);
+			}
+
+			if (doLocalTransaction) {
+				db.setTransactionSuccessful();
 			}
 			return result;
 		} finally {
