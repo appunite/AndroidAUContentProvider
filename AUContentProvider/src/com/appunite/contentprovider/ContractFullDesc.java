@@ -18,11 +18,13 @@ package com.appunite.contentprovider;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
 import android.database.sqlite.SQLiteDatabase;
@@ -292,6 +294,46 @@ public class ContractFullDesc {
 			sb.append(")");
 		}
 	}
+	
+	private Map<String, String> getQueryParameters(Uri uri) {
+	    if (uri.isOpaque()) {
+	        throw new UnsupportedOperationException("This isn't a hierarchical URI.");
+	    }
+	    
+	    String query = uri.getEncodedQuery();
+	    if (query == null) {
+	        return Collections.emptyMap();
+	    }
+
+	    Map<String, String> entries = new HashMap<String, String>();
+	    int start = 0;
+	    do {
+	        int next = query.indexOf('&', start);
+	        int end = (next == -1) ? query.length() : next;
+
+	        int separator = query.indexOf('=', start);
+	        if (separator > end || separator == -1) {
+	            separator = end;
+	        }
+	        int argStart = separator + 1;
+	        if (argStart > end) {
+	        	argStart = end;
+	        }
+	        int argEnd = query.indexOf('&', separator);
+	        if (argEnd > end || argEnd == -1) {
+	        	argEnd = end;
+	        }
+
+	        String name = query.substring(start, separator);
+	        String argument = query.substring(argStart, argEnd);
+	        entries.put(Uri.decode(name), Uri.decode(argument));
+
+	        // Move start to end of name.
+	        start = end + 1;
+	    } while (start < query.length());
+
+	    return Collections.unmodifiableMap(entries);
+	}
 
 	public SelectionVars getSelectionVarsFromUri(Uri uri) {
 		String insertField = null;
@@ -299,16 +341,22 @@ public class ContractFullDesc {
 		String table;
 		ContractDesc contractDesc;
 		Collection<String> selectionArgs = new ArrayList<String>();
-//		SelectionVars vars = new SelectionVars();
-//		vars.mInsertField = null;
-//		vars.mInsertValue = null;
+		int toClose = 0;
 		StringBuilder where = new StringBuilder();
 		List<String> pathSegments = uri.getPathSegments();
 		int currentPathSegment = pathSegments.size() - 1;
+		
+		Map<String, String> parameterNames = getQueryParameters(uri);
+		for (Entry<String, String> entry : parameterNames.entrySet()) {
+			where.append("((");
+			where.append(entry.getKey());
+			where.append(" = ? )");
+			toClose += 1;
+			selectionArgs.add(entry.getValue());
+		}
 
 		if (pathSegments.size() == 0)
 			throw new IllegalArgumentException("Unknown URI " + uri);
-		int toClose = 0;
 
 		if (lastSegmentIsId(pathSegments)) {
 			String id = pathSegments.get(currentPathSegment--);
@@ -317,10 +365,13 @@ public class ContractFullDesc {
 			if (contractDesc == null)
 				throw new IllegalArgumentException("Unknown URI " + uri
 						+ " not known table: " + table);
-			toClose += 1;
+			if (toClose > 0) {
+				where.append(" AND ");
+			}
 			where.append("((");
 			where.append(contractDesc.getIdField());
 			where.append(" == ? )");
+			toClose += 1;
 
 			selectionArgs.add(id);
 		} else {

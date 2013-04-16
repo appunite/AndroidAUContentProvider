@@ -52,7 +52,7 @@ public class ContentProviderHelper {
 	private static String[] concat(String[] first, Collection<String> second) {
 		String[] ret = new String[first.length + second.size()];
 		System.arraycopy(first, 0, ret, 0, first.length);
-		int pos = 0;
+		int pos = first.length;
 		for (String string : second) {
 			ret[pos] = string;
 			pos++;
@@ -65,7 +65,7 @@ public class ContentProviderHelper {
 			return selection2;
 		if (TextUtils.isEmpty(selection2))
 			return selection1;
-		return String.format("(%s) && (%s)", selection1, selection2);
+		return String.format("(%s) AND (%s)", selection1, selection2);
 	}
 	
 	public static String[] joinProjections(String[] projection1, String... projection2) {

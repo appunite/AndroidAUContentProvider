@@ -227,7 +227,7 @@ public abstract class BaseContentProvider extends ContentProvider implements
 
 		ContractDesc contractDesc = fullDesc.getContractDesc(table);
 		String groupBy = contractDesc.getIdField();
-
+		
 		selection = ContentProviderHelper.joinSelection(selection,
 				selectionVars.getSelection());
 		selectionArgs = ContentProviderHelper.joinSelectionArgs(selectionArgs,
