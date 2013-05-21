@@ -1,0 +1,2 @@
+include ":AUContentProvider"
+include ":AUContentProviderExample"
