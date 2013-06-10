@@ -17,7 +17,7 @@ repositories {
 
 dependencies {
     compile project(":AUContentProvider")
-    //compile "com.appunite:aucontentprovider:1.0"
+    //compile "com.appunite:aucontentprovider:1.1"
 }
 
 android {

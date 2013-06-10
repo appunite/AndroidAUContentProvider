@@ -33,7 +33,10 @@ import android.provider.BaseColumns;
 import android.text.TextUtils;
 
 public class ContractFullDesc {
-	private ContractFullDesc() {
+
+    private String key;
+
+    private ContractFullDesc() {
 	}
 
 	private final Collection<ConnectionDesc> mConnectionDescs = new ArrayList<ContractFullDesc.ConnectionDesc>();
@@ -348,8 +351,12 @@ public class ContractFullDesc {
 		
 		Map<String, String> parameterNames = getQueryParameters(uri);
 		for (Entry<String, String> entry : parameterNames.entrySet()) {
+            key = entry.getKey();
+            if (TextUtils.equals("limit", key)) {
+                continue;
+            }
 			where.append("((");
-			where.append(entry.getKey());
+            where.append(key);
 			where.append(" = ? )");
 			toClose += 1;
 			selectionArgs.add(entry.getValue());
