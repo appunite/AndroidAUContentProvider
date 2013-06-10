@@ -355,6 +355,9 @@ public class ContractFullDesc {
             if (TextUtils.equals("limit", key)) {
                 continue;
             }
+            if (toClose > 0) {
+                where.append(" AND ");
+            }
 			where.append("((");
             where.append(key);
 			where.append(" = ? )");
