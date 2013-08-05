@@ -3,7 +3,7 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:0.4'
+        classpath 'com.android.tools.build:gradle:0.5.+'
     }
 }
 
@@ -12,6 +12,7 @@ apply plugin: 'maven'
 
 repositories {
     mavenCentral()
+    maven {url 'https://commondatastorage.googleapis.com/maven-repository/'}
 }
 
 configurations {
@@ -19,11 +20,21 @@ configurations {
 }
 
 dependencies {
-    deployerJars "org.apache.maven.wagon:wagon-ssh:2.2"
+    deployerJars 'com.googlesource.gerrit:gs-maven-wagon:3.3.1'
     compile fileTree(dir: 'libs', include: '*.jar')
 }
 
-version = "1.2"
+def baseVersionName = "1.2"
+if (project.hasProperty("versionSuffix")) {
+    project.ext.versionSuffix = project.versionSuffix
+} else {
+    project.ext.versionSuffix = "snapshot"
+}
+if (project.ext.versionSuffix) {
+    version = "${baseVersionName}-${project.versionSuffix}"
+} else {
+    version = "${baseVersionName}"
+}
 archivesBaseName = "aucontentprovider"
 group = "com.appunite"
 
@@ -91,14 +102,22 @@ task install(type: Upload, dependsOn: createPomFile) {
     }
 }
 
+Properties props = new Properties()
+def credentialsProperties = file("credentials.properties")
+if (credentialsProperties.exists()) {
+        props.load(new FileInputStream(credentialsProperties))
+}
+
 uploadArchives {
     description = "Upload archives to maven repository"
     dependsOn createPomFile
     repositories {
         mavenDeployer {
             configuration = configurations.deployerJars
-            repository(url: "sftp://mavenrepo@192.158.30.128/repository/") {
-                authentication(userName: "mavenrepo")
+            repository(url: "gs://maven-repository") {
+                authentication(
+                userName: "${props.getProperty('mavenUser', null)}" ,
+                password: "${props.getProperty('mavenPassword', null)}")
             }
             pom = project.ext.pomFile
         }
