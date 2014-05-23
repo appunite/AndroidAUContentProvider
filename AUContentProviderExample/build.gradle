@@ -3,9 +3,12 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:0.4'
+        classpath 'com.android.tools.build:gradle:0.10.+'
+        classpath 'com.jakewharton.sdkmanager:gradle-plugin:0.10.+'
     }
 }
+
+apply plugin: 'android-sdk-manager'
 apply plugin: 'android'
 
 repositories {
@@ -15,16 +18,16 @@ repositories {
 
 dependencies {
     compile project(":AUContentProvider")
-    //compile "com.appunite:aucontentprovider:1.2"
+    //compile "com.appunite:aucontentprovider:1.2.1"
 }
 
 android {
-    compileSdkVersion 17
-    buildToolsVersion "17"
+    compileSdkVersion 19
+    buildToolsVersion '19.1.0'
 
     defaultConfig {
         minSdkVersion 7
-        targetSdkVersion 17
+        targetSdkVersion 19
     }
     sourceSets {
         main {
@@ -38,5 +41,12 @@ android {
         }
 
         instrumentTest.setRoot('tests')
+    }
+
+    lintOptions {
+        abortOnError true
+        disable 'InvalidPackage'
+        xmlOutput file("${reporting.baseDir}/lint/lint-results.xml")
+        htmlOutput file("${reporting.baseDir}/lint/lint-results.html")
     }
 }

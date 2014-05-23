@@ -3,10 +3,12 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:0.5.+'
+        classpath 'com.android.tools.build:gradle:0.10.+'
+        classpath 'com.jakewharton.sdkmanager:gradle-plugin:0.10.+'
     }
 }
 
+apply plugin: 'android-sdk-manager'
 apply plugin: 'android-library'
 apply plugin: 'maven'
 
@@ -24,7 +26,7 @@ dependencies {
     compile fileTree(dir: 'libs', include: '*.jar')
 }
 
-def baseVersionName = "1.2"
+def baseVersionName = "1.2.1"
 if (project.hasProperty("versionSuffix")) {
     project.ext.versionSuffix = project.versionSuffix
 } else {
@@ -39,12 +41,12 @@ archivesBaseName = "aucontentprovider"
 group = "com.appunite"
 
 android {
-    compileSdkVersion 14
-    buildToolsVersion "17"
+    compileSdkVersion 19
+    buildToolsVersion '19.1.0'
 
     defaultConfig {
         minSdkVersion 7
-        targetSdkVersion 15
+        targetSdkVersion 19
     }
 
     sourceSets {
@@ -59,6 +61,13 @@ android {
         }
 
         instrumentTest.setRoot('tests')
+    }
+
+    lintOptions {
+        abortOnError true
+        disable 'InvalidPackage'
+        xmlOutput file("${reporting.baseDir}/lint/lint-results.xml")
+        htmlOutput file("${reporting.baseDir}/lint/lint-results.html")
     }
 }
 
