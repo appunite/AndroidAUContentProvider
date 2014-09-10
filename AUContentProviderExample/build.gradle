@@ -3,13 +3,13 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:0.10.+'
-        classpath 'com.jakewharton.sdkmanager:gradle-plugin:0.10.+'
+        classpath 'com.android.tools.build:gradle:0.12.2'
+        classpath 'com.jakewharton.sdkmanager:gradle-plugin:0.10.1'
     }
 }
 
 apply plugin: 'android-sdk-manager'
-apply plugin: 'android'
+apply plugin: 'com.android.application'
 
 repositories {
     mavenCentral()
@@ -18,7 +18,7 @@ repositories {
 
 dependencies {
     compile project(":AUContentProvider")
-    //compile "com.appunite:aucontentprovider:1.2.2"
+    //compile "com.appunite:aucontentprovider:1.2.3"
 }
 
 android {

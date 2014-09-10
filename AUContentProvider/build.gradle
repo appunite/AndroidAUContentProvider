@@ -3,13 +3,13 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:0.10.+'
-        classpath 'com.jakewharton.sdkmanager:gradle-plugin:0.10.+'
+        classpath 'com.android.tools.build:gradle:0.12.2'
+        classpath 'com.jakewharton.sdkmanager:gradle-plugin:0.10.1'
     }
 }
 
 apply plugin: 'android-sdk-manager'
-apply plugin: 'android-library'
+apply plugin: 'com.android.library'
 apply plugin: 'maven'
 
 repositories {
@@ -26,7 +26,7 @@ dependencies {
     compile fileTree(dir: 'libs', include: '*.jar')
 }
 
-def baseVersionName = "1.2.2"
+def baseVersionName = "1.2.3"
 if (project.hasProperty("versionSuffix")) {
     project.ext.versionSuffix = project.versionSuffix
 } else {
@@ -120,16 +120,14 @@ if (credentialsProperties.exists()) {
 uploadArchives {
     description = "Upload archives to maven repository"
     dependsOn createPomFile
-    repositories {
-        mavenDeployer {
-            configuration = configurations.deployerJars
-            repository(url: "gs://maven-repository") {
-                authentication(
-                userName: "${props.getProperty('mavenUser', null)}" ,
-                password: "${props.getProperty('mavenPassword', null)}")
-            }
-            pom = project.ext.pomFile
+    repositories.mavenDeployer {
+        configuration = configurations.deployerJars
+        repository(url: "gs://maven-repository") {
+            authentication(
+            userName: "${props.getProperty('mavenUser', null)}" ,
+            password: "${props.getProperty('mavenPassword', null)}")
         }
+        pom = project.ext.pomFile
     }
 }
 
