@@ -25,11 +25,26 @@ git init work || exit 1
 cd work || exit 1
 git fetch ssh://jenkins@$GERRIT_HOST:$GERRIT_PORT/$GERRIT_PROJECT $GERRIT_REFSPEC && git checkout FETCH_HEAD || exit 1
 
+cp /tmp/credentials.properties AUContentProvider/credentials.properties || exit 1
+
 TASKS="build"
 
-./gradlew --parallel --refresh-dependencies ${TASKS} --stacktrace --project-prop versionSuffix="$GERRIT_CHANGE_NUMBER.$GERRIT_PATCHSET_NUMBER"
+./gradlew --parallel \
+	--refresh-dependencies ${TASKS} \
+	--stacktrace \
+	--project-prop versionSuffix="$GERRIT_CHANGE_NUMBER.$GERRIT_PATCHSET_NUMBER"
 
 OUT=$?
+
+if [ $OUT -eq 0 ];
+then
+	if [ ${GERRIT_EVENT_TYPE} == "change-merged" ];
+	then
+		./gradlew uploadArchives \
+			--project-prop versionSuffix="$GERRIT_CHANGE_NUMBER.$GERRIT_PATCHSET_NUMBER"
+		OUT=$?
+	fi
+fi
 
 
 mkdir -p /tmp/build/AUContentProvider
