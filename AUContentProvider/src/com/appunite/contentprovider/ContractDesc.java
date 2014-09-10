@@ -16,15 +16,15 @@
 
 package com.appunite.contentprovider;
 
+import android.database.sqlite.SQLiteDatabase;
+import android.provider.BaseColumns;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
-
-import android.database.sqlite.SQLiteDatabase;
-import android.provider.BaseColumns;
 
 public class ContractDesc {
 	
@@ -45,7 +45,7 @@ public class ContractDesc {
 	ArrayList<OnAfterDeleteTrigger> mOnAfterDeleteTriggers = new ArrayList<OnAfterDeleteTrigger>();
 	
 	public enum FieldType {
-		TEXT("TEXT"), INTEGER("INTEGER"), REAL("REAL");
+		TEXT("TEXT"), INTEGER("INTEGER"), REAL("REAL"), BLOB("BLOB");
 
 		private String mTypeString;
 

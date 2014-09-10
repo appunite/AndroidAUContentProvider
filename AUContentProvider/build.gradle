@@ -26,7 +26,7 @@ dependencies {
     compile fileTree(dir: 'libs', include: '*.jar')
 }
 
-def baseVersionName = "1.2.1"
+def baseVersionName = "1.2.2"
 if (project.hasProperty("versionSuffix")) {
     project.ext.versionSuffix = project.versionSuffix
 } else {
