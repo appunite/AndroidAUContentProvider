@@ -1,34 +1,24 @@
-buildscript {
-    repositories {
-        mavenCentral()
-    }
-    dependencies {
-        classpath 'com.android.tools.build:gradle:0.12.2'
-        classpath 'com.jakewharton.sdkmanager:gradle-plugin:0.10.1'
-    }
-}
-
-apply plugin: 'android-sdk-manager'
 apply plugin: 'com.android.application'
 
 repositories {
+    google()
     mavenCentral()
     maven {url 'https://commondatastorage.googleapis.com/maven-repository/'}
 }
 
 dependencies {
-    compile project(":AUContentProvider")
-    //compile "com.appunite:aucontentprovider:1.2.3"
+    implementation project(":AUContentProvider")
 }
 
 android {
-    compileSdkVersion 19
-    buildToolsVersion '19.1.0'
+    compileSdkVersion 28
+    buildToolsVersion '28.0.3'
 
     defaultConfig {
-        minSdkVersion 7
-        targetSdkVersion 19
+        minSdkVersion 14
+        targetSdkVersion 28
     }
+
     sourceSets {
         main {
             manifest.srcFile 'AndroidManifest.xml'
@@ -40,7 +30,7 @@ android {
             assets.srcDirs = ['assets']
         }
 
-        instrumentTest.setRoot('tests')
+        androidTest.setRoot('tests')
     }
 
     lintOptions {

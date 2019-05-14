@@ -211,8 +211,10 @@ public abstract class BaseContentProvider extends ContentProvider implements
 
 	@Override
 	public Cursor query(Uri uri, String[] projection, String selection,
-			String[] selectionArgs, String sortOrder) {
+						String[] selectionArgs, String sortOrder) {
 		SQLiteQueryBuilder queryBuilder = new SQLiteQueryBuilder();
+
+		queryBuilder.setStrict(true);
 
 		ContractFullDesc fullDesc = getFullDesc();
 		SelectionVars selectionVars = fullDesc.getSelectionVarsFromUri(uri);
@@ -227,7 +229,7 @@ public abstract class BaseContentProvider extends ContentProvider implements
 
 		ContractDesc contractDesc = fullDesc.getContractDesc(table);
 		String groupBy = contractDesc.getIdField();
-		
+
 		selection = ContentProviderHelper.joinSelection(selection,
 				selectionVars.getSelection());
 		selectionArgs = ContentProviderHelper.joinSelectionArgs(selectionArgs,
@@ -269,8 +271,8 @@ public abstract class BaseContentProvider extends ContentProvider implements
 	@SuppressWarnings("deprecation")
 	@TargetApi(11)
 	private void printQueryInDebug(SQLiteQueryBuilder queryBuilder,
-			String[] projection, String selection, String[] selectionArgs,
-			String groupBy, String having, String sortOrder) {
+								   String[] projection, String selection, String[] selectionArgs,
+								   String groupBy, String having, String sortOrder) {
 		if (DEBUG) {
 			String query;
 			if (Build.VERSION.SDK_INT >= 11) {
@@ -286,7 +288,7 @@ public abstract class BaseContentProvider extends ContentProvider implements
 
 	@Override
 	public int update(Uri uri, ContentValues values, String selection,
-			String[] selectionArgs) {
+					  String[] selectionArgs) {
 
 		SelectionVars selectionVars = getFullDesc()
 				.getSelectionVarsFromUri(uri);
@@ -330,16 +332,16 @@ public abstract class BaseContentProvider extends ContentProvider implements
 
 	@Override
 	public Cursor query(String table, String[] columns, String selection,
-			String[] selectionArgs, String groupBy, String having,
-			String orderBy) {
+						String[] selectionArgs, String groupBy, String having,
+						String orderBy) {
 		return query(false, table, columns, selection, selectionArgs, groupBy,
 				having, orderBy, null);
 	}
 
 	@Override
 	public Cursor query(boolean distinct, String table, String[] columns,
-			String selection, String[] selectionArgs, String groupBy,
-			String having, String orderBy, String limit) {
+						String selection, String[] selectionArgs, String groupBy,
+						String having, String orderBy, String limit) {
 		if (DEBUG) {
 			StringBuilder sb = new StringBuilder();
 			sb.append("SELECT ");
@@ -381,7 +383,7 @@ public abstract class BaseContentProvider extends ContentProvider implements
 
 	@Override
 	public int update(String table, ContentValues values, String selection,
-			String[] selectionArgs) {
+					  String[] selectionArgs) {
 		if (DEBUG) {
 			StringBuilder sbArgs = new StringBuilder();
 			StringBuilder sb = new StringBuilder();
@@ -419,7 +421,7 @@ public abstract class BaseContentProvider extends ContentProvider implements
 
 	@Override
 	public long insertOrThrow(String table, String nullColumnHack,
-			ContentValues values) throws SQLException {
+							  ContentValues values) throws SQLException {
 		if (DEBUG) {
 			StringBuilder sbArgs = new StringBuilder();
 			StringBuilder sb = new StringBuilder();
