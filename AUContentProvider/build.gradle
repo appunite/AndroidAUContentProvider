@@ -1,20 +1,11 @@
-buildscript {
-    repositories {
-        mavenCentral()
-    }
-    dependencies {
-        classpath 'com.android.tools.build:gradle:0.12.2'
-        classpath 'com.jakewharton.sdkmanager:gradle-plugin:0.10.1'
-    }
-}
-
-apply plugin: 'android-sdk-manager'
 apply plugin: 'com.android.library'
 apply plugin: 'maven'
 
 repositories {
+    google()
     mavenCentral()
     maven {url 'https://commondatastorage.googleapis.com/maven-repository/'}
+    jcenter()
 }
 
 configurations {
@@ -23,10 +14,10 @@ configurations {
 
 dependencies {
     deployerJars 'com.googlesource.gerrit:gs-maven-wagon:3.3.1'
-    compile fileTree(dir: 'libs', include: '*.jar')
+    implementation fileTree(dir: 'libs', include: '*.jar')
 }
 
-def baseVersionName = "1.2.3"
+def baseVersionName = "1.3"
 if (project.hasProperty("versionSuffix")) {
     project.ext.versionSuffix = project.versionSuffix
 } else {
@@ -41,12 +32,12 @@ archivesBaseName = "aucontentprovider"
 group = "com.appunite"
 
 android {
-    compileSdkVersion 19
-    buildToolsVersion '19.1.0'
+    compileSdkVersion 28
+    buildToolsVersion '28.0.3'
 
     defaultConfig {
-        minSdkVersion 7
-        targetSdkVersion 19
+        minSdkVersion 14
+        targetSdkVersion 28
     }
 
     sourceSets {
@@ -60,7 +51,7 @@ android {
             assets.srcDirs = ['assets']
         }
 
-        instrumentTest.setRoot('tests')
+        androidTest.setRoot('tests')
     }
 
     lintOptions {
@@ -114,7 +105,7 @@ task install(type: Upload, dependsOn: createPomFile) {
 Properties props = new Properties()
 def credentialsProperties = file("credentials.properties")
 if (credentialsProperties.exists()) {
-        props.load(new FileInputStream(credentialsProperties))
+    props.load(new FileInputStream(credentialsProperties))
 }
 
 uploadArchives {
@@ -124,8 +115,8 @@ uploadArchives {
         configuration = configurations.deployerJars
         repository(url: "gs://maven-repository") {
             authentication(
-            userName: "${props.getProperty('mavenUser', null)}" ,
-            password: "${props.getProperty('mavenPassword', null)}")
+                    userName: "${props.getProperty('mavenUser', null)}" ,
+                    password: "${props.getProperty('mavenPassword', null)}")
         }
         pom = project.ext.pomFile
     }
